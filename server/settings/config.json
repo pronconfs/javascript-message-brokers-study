@@ -1,0 +1,8 @@
+{
+    "protocol" : "mqtt",
+    "host": "localhost",
+    "port": "9000",
+    "subscriptions" : [
+        { "topic" : "topic"}
+    ]
+}

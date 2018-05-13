@@ -1,0 +1,19 @@
+{
+  "name": "interface",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "mqtt": "^2.18.0",
+    "paho": "^1.0.0",
+    "paho-mqtt": "^1.0.4",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-scripts": "1.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

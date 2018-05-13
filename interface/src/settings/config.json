@@ -1,0 +1,8 @@
+{
+    "protocol" : "ws",
+    "host": "localhost",
+    "port": "9001",
+    "subscriptions" : [
+        { "topic" : "topic"}
+    ]    
+}

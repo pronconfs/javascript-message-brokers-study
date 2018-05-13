@@ -1,0 +1,15 @@
+{
+  "name": "mqtt-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Diogo Aleixo",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^2.18.0",
+    "uuid": "^3.2.1"
+  }
+}
