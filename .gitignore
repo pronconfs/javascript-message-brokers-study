@@ -1,6 +1,6 @@
-server/node_modules/
-server/package-lock.json
-
 interface/node_modules/
 interface/yarn.lock
 interface/package-lock.json
+
+node_modules/
+

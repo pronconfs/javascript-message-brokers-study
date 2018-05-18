@@ -1,0 +1,24 @@
+{
+  "name": "javascript-message-brokers-study",
+  "version": "1.0.0",
+  "description": "This repo contains study on message-broker. This study was made because of a need to scale and improve availability of a given system",  
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "mqtt": "^2.18.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleixo/javascript-message-brokers-study.git"
+  },
+  "author": "Diogo Aleixo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aleixo/javascript-message-brokers-study/issues"
+  },
+  "homepage": "https://github.com/aleixo/javascript-message-brokers-study#readme"
+}
