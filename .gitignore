@@ -3,4 +3,5 @@ interface/yarn.lock
 interface/package-lock.json
 
 node_modules/
+full-poc/*/node_modules
 
