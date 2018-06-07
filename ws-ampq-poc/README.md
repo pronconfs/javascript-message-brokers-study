@@ -9,6 +9,7 @@ THE WHOLE THING LACK TESTING AND I NEED TO SPEND TIME MAKING EVERYTHING BULLET P
 ```
 
 ## TODO
+- [ ] Create configs to broker addresses, ports, etc
 - [ ] Some messages stick with the queue because of not beeing ack´d. THis may be because of the agregator failover. The original socked, never acks the original message Only the slave connection tries to do it, but ona diferent tag. 
 - [ ] The agregator failover does not seem to be behaving like it should on stress situations.
 - [ ] Guarantee the acknowledgement of all the messages in all the situations.
