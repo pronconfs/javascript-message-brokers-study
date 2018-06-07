@@ -1,53 +1,26 @@
-const BrokerService = require('./BrokerService');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const BrokerService = require('../shared/BrokerService');
+
 const environment = process.argv[2];
 const brokerService = new BrokerService({
-    rx: environment === 'localhost' ? 'localhost' : '3GdtrY_s:78ov3IyCFAxyMNpysTBMt8AgR38PZnik@sad-silver-53.bigwig.lshift.net:10003/6TAe0JLKstBE',
-    tx: environment === 'localhost' ? 'localhost' : '3GdtrY_s:78ov3IyCFAxyMNpysTBMt8AgR38PZnik@sad-silver-53.bigwig.lshift.net:10002/6TAe0JLKstBE',
-});
+    rx: environment === 'localhost' ? 'localhost:5672' : '3GdtrY_s:78ov3IyCFAxyMNpysTBMt8AgR38PZnik@sad-silver-53.bigwig.lshift.net:10003/6TAe0JLKstBE',
+    tx: environment === 'localhost' ? 'localhost:5672' : '3GdtrY_s:78ov3IyCFAxyMNpysTBMt8AgR38PZnik@sad-silver-53.bigwig.lshift.net:10002/6TAe0JLKstBE',
+}, ['localhost:5674'], ['localhost:5674']);
 
 const app = express(); 
 const router = express.Router();
 
-const brokerExternalConfigs = {
-    external_events_voice : {
-        name : 'external_events_voice',        
-        exchange : {
-            name : 'external_events_exchange',
-            bindingKey : 'bind_external_events_voice',
-            type: 'direct',
-        }
-    },
-    external_events_chat : {
-        name : 'external_events_chat',        
-        exchange : {
-            name : 'external_events_exchange',
-            bindingKey : 'bind_external_events_chat',
-            type: 'direct',
-        }
-    },
-    external_events_tickets : {
-        name : 'external_events_tickets',        
-        exchange : {
-            name : 'external_events_exchange',
-            bindingKey : 'bind_external_events_tickets',
-            type: 'direct',
-        }
-    }
-}
-
-function produce(data, exchangeType) {
+function publish(data, channel) {
     const exchange = {
-        name : brokerExternalConfigs[exchangeType].exchange.name,
-        type : brokerExternalConfigs[exchangeType].exchange.type,
-        durable : false,
-        autoDelete : true,
-        bindingKey : brokerExternalConfigs[exchangeType].exchange.bindingKey,
-    };
-
-    brokerService.publish(exchange, {
+        name : brokerService.configs[channel].external.exchange.name,
+        type : brokerService.configs[channel].external.exchange.type,
+        durable: brokerService.configs[channel].external.exchange.durable,
+        autoDelete: brokerService.configs[channel].external.exchange.autoDelete,
+    }
+    const routingKey = brokerService.configs[channel].external.queue.bindingKey;
+    const msg = {
         payload : {
             unicast : data.unicast,
             multicast : data.multicast,
@@ -57,22 +30,23 @@ function produce(data, exchangeType) {
             message: data.message,
             work_time : data.work_time || 0,
         },
-        persistent: true      
-    });
+        persistent: true 
+    }
+    brokerService.publish(exchange, routingKey, msg);    
 }
 
-router.post('/external_events_voice', (req, res) => {    
-    produce(req.body, 'external_events_voice')
+router.post('/voice', (req, res) => {    
+    publish(req.body, 'VOICE')
     res.send('DONE');        
 });
 
-router.post('/external_events_chat', (req, res) => {    
-    produce(req.body, 'external_events_chat')
+router.post('/chat', (req, res) => {    
+    publish(req.body, 'CHAT')
     res.send('DONE');        
 });
 
-router.post('/external_events_tickets', (req, res) => {    
-    produce(req.body, 'external_events_tickets')
+router.post('/tickets', (req, res) => {    
+    publish(req.body, 'TICKETS')
     res.send('DONE');        
 });
 

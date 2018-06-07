@@ -4,7 +4,7 @@
   "description": "Agregator",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js -localhost-",
+    "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Diogo Aleixo",
@@ -13,7 +13,9 @@
     "amqplib": "^0.5.2",
     "engine.io": "^3.2.0",
     "express": "^4.16.3",
+    "lodash": "^4.17.10",
     "morgan": "^1.9.0",
-    "primus": "^7.2.2"
+    "primus": "^7.2.2",
+    "primus-responder": "^1.0.4"
   }
 }

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import PrimusChat from './lib/primusChat';
-import PrimusTickets from './lib/primusTickets';
-import PrimusVoice from './lib/primusVoice';
-import { Button, ButtonToolbar } from 'react-bootstrap/lib';
+import PrimusChat from './lib/primus_CHAT';
+import PrimusTickets from './lib/primus_TICKETS';
+import PrimusVoice from './lib/primus_VOICE';
+import { Checkbox, Form, FormControl,ControlLabel,FormGroup,FieldGroup,Button, ButtonToolbar } from 'react-bootstrap/lib';
 
 import SocketMessage from './models/SocketMessage';
 
@@ -16,22 +16,39 @@ const VOICE_CHANNEL = 'VOICE';
 const CHAT_CHANNEL = 'CHAT';
 const TICKETS_CHANNEL = 'TICKETS';
 
+const VOICE_BACKUP_PORT = 5001;
+const CHAT_BACKUP_PORT = 5002;
+const TICKETS_BACKUP_PORT = 5003;
+
 let primusTickets;
 let primusVoice;
 let primusChat
+
 class App extends Component {
   constructor() {
     super(); 
+    this.prevSocketId = {
+      voice : '',
+      chat: '',
+      tickets: '',
+    };
+
     this.state = {
       sockets : {
         hasVoice : false,
         hasChat : false,
         hasTickets : false
-      }
+      },
+      ACTION: '',
+      MESSAGE: '',
+      REPLY : false
     };
+
+    this.voiceInterval;
   }
   
-  connectVoice() {
+  connectVoice(port) {
+    console.log('WILL TRY TO CONNECT TO',port)
     if (this.state.sockets.hasVoice) {
       primusVoice.end();
       return this.setState({
@@ -41,22 +58,48 @@ class App extends Component {
           hasChat : this.state.sockets.hasChat,
         }});
     }
-    primusVoice = new PrimusVoice(`http://localhost:${VOICE_PORT}`);              
-    primusVoice.on('open', () => {    
+    primusVoice = new PrimusVoice(`http://localhost:${port}`, {
+      reconnect: {          
+          min: 500 // Number: The minimum delay before we try reconnect.
+        , retries: 1 // Number: How many times we should try to reconnect.
+      }
+    });              
+    primusVoice.on('open', () => {         
       this.setState({
         sockets : {
           hasVoice : true,
           hasTickets : this.state.sockets.hasTickets,
           hasChat : this.state.sockets.hasChat,
         }}); 
-      primusVoice.write(new SocketMessage(true, 'VOICE MESSAGE', 'ACTION', VOICE_CHANNEL).data);        
+      primusVoice.writeAndWait(new SocketMessage(true, 'VOICE MESSAGE', 'ACTION', VOICE_CHANNEL, false, 0, 1).data);        
     });          
-    primusVoice.on('data', function (data) {   
+    primusVoice.on('data', (data) => {   
       console.log('[VOICE SOCKET] ',data)   
+      this.prevSocketId.voice = data.id       
     });
+    primusVoice.on('end', (data) => {   
+      console.log('CON END')    
+    });
+    primusVoice.on('reconnect failed', (err, opts) => {
+      this.setState({
+        sockets : {
+          hasVoice : false,
+          hasTickets : this.state.sockets.hasTickets,
+          hasChat : this.state.sockets.hasChat,
+        }}, () => {
+          setTimeout( () => {
+            console.log('WILL TRY TO CONNECT TO OTHER PORT');
+            this.connectVoice(port === VOICE_BACKUP_PORT ? VOICE_PORT : VOICE_BACKUP_PORT)
+          }, 2000)       
+        });
+    });
+    primusVoice.on('request', function(data, done) {
+      console.log('ON REQUEST', data);
+      done('this is the response');
+  });
   }
 
-  connectChat() {
+  connectChat(port) {
     if (this.state.sockets.hasChat) {
       primusChat.end();
       return this.setState({
@@ -66,7 +109,12 @@ class App extends Component {
           hasChat : false,
         }});
     }
-    primusChat = new PrimusChat(`http://localhost:${CHAT_PORT}`);                    
+    primusChat = new PrimusChat(`http://localhost:${port}`, {
+      reconnect: {          
+          min: 500 // Number: The minimum delay before we try reconnect.
+        , retries: 1 // Number: How many times we should try to reconnect.
+      }
+    });                    
     primusChat.on('open', () => {      
       this.setState({
         sockets : {
@@ -74,16 +122,30 @@ class App extends Component {
           hasTickets : this.state.sockets.hasTickets,
           hasChat : true,
         }});
-      primusChat.write(new SocketMessage(true, 'CHAT MESSAGE', 'ACTION', CHAT_CHANNEL).data);
+      primusChat.write(new SocketMessage(true, 'CHAT MESSAGE', 'ACTION', CHAT_CHANNEL, false, 0, 1).data);
     });      
-    primusChat.on('data', function (data) {
-      console.log('[CHAT SOCKET] ',data)      
+    primusChat.on('data', (data) => {
+      console.log('[CHAT SOCKET] ',data)  
+      this.prevSocketId.chat = data.id    
     }); 
+    primusChat.on('reconnect failed', (err, opts) => {
+      this.setState({
+        sockets : {
+          hasVoice : this.state.sockets.hasVoice,
+          hasTickets : this.state.sockets.hasTickets,
+          hasChat : false,
+        }}, () => {
+          setTimeout( () => {
+            console.log('WILL TRY TO CONNECT TO OTHER PORT');
+            this.connectChat(port === CHAT_BACKUP_PORT ? CHAT_PORT : CHAT_BACKUP_PORT)
+          }, 2000)       
+        });
+    });
   }
 
-  connectTickets() {
+  connectTickets(port) {
     if (this.state.sockets.hasTickets) {
-      primusTickets.end();
+      primusTickets.destroy();
       return this.setState({
         sockets : {
           hasVoice : this.state.sockets.hasVoice,
@@ -91,7 +153,12 @@ class App extends Component {
           hasChat : this.state.sockets.hasChat,
         }});
     }
-    primusTickets = new PrimusTickets(`http://localhost:${TICKETS_PORT}`);                  
+    primusTickets = new PrimusTickets(`http://localhost:${port}`, {
+      reconnect: {          
+          min: 500 // Number: The minimum delay before we try reconnect.
+        , retries: 1 // Number: How many times we should try to reconnect.
+      }
+    });                  
     primusTickets.on('open', () => {      
       this.setState({
         sockets : {
@@ -99,11 +166,41 @@ class App extends Component {
           hasTickets : true,
           hasChat : this.state.sockets.hasChat,
         }});
-      primusTickets.write(new SocketMessage(true, 'TICKETS MESSAGE', 'ACTION', TICKETS_CHANNEL).data);
+      primusTickets.write(new SocketMessage(true, 'TICKETS MESSAGE', 'ACTION', TICKETS_CHANNEL, false, 0, 1).data);
     });      
-    primusTickets.on('data', function (data) {   
-      console.log('[TICKETS SOCKET] ',data)        
-    });    
+    primusTickets.on('data', (data) => {   
+      console.log('[TICKETS SOCKET] ',data)     
+      this.prevSocketId.tickets = data.id       
+    });  
+    primusTickets.on('reconnect failed', (err, opts) => {
+      this.setState({
+        sockets : {
+          hasVoice : this.state.sockets.hasVoice,
+          hasTickets : false,
+          hasChat : this.state.sockets.hasChat,
+        }}, () => {
+          setTimeout( () => {
+            console.log('WILL TRY TO CONNECT TO OTHER PORT');
+            this.connectTickets(port === TICKETS_BACKUP_PORT ? TICKETS_PORT : TICKETS_BACKUP_PORT)
+          }, 2000)       
+        });
+    });  
+  }
+
+  handleFormChange(e) {    
+    this.setState({
+      [e.target.name] : e.target.hasOwnProperty('checked') ? e.target.checked : e.target.value,
+    }, () => console.log(this.state));    
+  }
+
+  handleFormSubmit(e) {        
+    e.preventDefault();    
+    const mapper = {
+      'VOICE' : (message, reply, workTime) => this.state.sockets.hasVoice && primusVoice.write(new SocketMessage(false, message, 'DO VOICE THINGS', VOICE_CHANNEL, !reply, workTime).data),
+      'CHAT' : (message, reply, workTime) => this.state.sockets.hasChat &&  primusChat.write(new SocketMessage(false, message, 'DO CHAT THINGS', CHAT_CHANNEL, !reply, workTime).data),
+      'TICKETS' : (message, reply, workTime) => this.state.sockets.hasTickets &&  primusTickets.write(new SocketMessage(false, message, 'DO TICKETS THINGS', TICKETS_CHANNEL, !reply, workTime).data)
+    }    
+    mapper[this.state.ACTION].call(this,this.state.MESSAGE,this.state.REPLY,this.state.WORK_TIME)
   }
 
   render() {
@@ -121,21 +218,67 @@ class App extends Component {
         <ButtonToolbar>
           <Button              
               bsStyle={this.state.sockets.hasVoice ? "success" : "warning"}
-              onClick={this.connectVoice.bind(this)}              
+              onClick={this.connectVoice.bind(this, VOICE_PORT)}              
           > VOICE
           </Button>
           <Button              
               bsStyle={this.state.sockets.hasChat ? "success" : "warning"}
-              onClick={this.connectChat.bind(this)}              
+              onClick={this.connectChat.bind(this, CHAT_PORT)}              
           > CHAT
           </Button>
           <Button              
               bsStyle={this.state.sockets.hasTickets ? "success" : "warning"}
-              onClick={this.connectTickets.bind(this)}              
+              onClick={this.connectTickets.bind(this, TICKETS_PORT)}              
           > TICKETS
           </Button>
         </ButtonToolbar>  
-        </div>               
+        </div>   
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+        <Form horizontal onSubmit={this.handleFormSubmit.bind(this)}>                       
+          <FormGroup onChange={this.handleFormChange.bind(this)} >
+            
+            <ControlLabel>Select</ControlLabel>
+            <FormControl name="ACTION" componentClass="select" placeholder="Action">
+              <option value="SELECT">select</option>
+              <option value="VOICE">VOICE</option>
+              <option value="CHAT">CHAT</option>
+              <option value="TICKETS">TICKETS</option>
+            </FormControl>
+
+            <ControlLabel>Message</ControlLabel>
+            <FormControl            
+              name="MESSAGE"
+              type="text"
+              label="Message"
+              placeholder="Enter message"
+            />
+            <ControlLabel>Work time</ControlLabel>
+            <FormControl name="WORK_TIME" componentClass="select" placeholder="Action">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </FormControl> 
+            <ControlLabel>Reply</ControlLabel>
+            <Checkbox                
+                name="REPLY"
+                value={this.state.REPLY}                
+            />
+          </FormGroup>
+                      
+          <Button type="submit">Submit</Button>
+        </Form>
+        </div>            
       </div>
     );
   }

@@ -1,15 +1,14 @@
 export default class {
-    constructor(subscribe, message, action, channel) {
-        this.subscribe = subscribe;
-        this.message = message;
-        this.action = action;
-        this.channel = channel;
+    constructor(subscribe, message, action, channel, noReply=true, work_time = 0, prevSockId=0) {        
         this.data = {
             subscribe,
             message, 
             action,
-            channel
-        }
+            channel,
+            noReply,
+            work_time,
+            prevSockId,
+        }        
         Object.freeze(this);
     }
 }

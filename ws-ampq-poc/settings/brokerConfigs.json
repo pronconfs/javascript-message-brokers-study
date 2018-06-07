@@ -1,0 +1,153 @@
+{
+    "VOICE" : {
+        "channel" : "VOICE",
+        "external" : {            
+            "exchange" : {
+                "name" : "external_exchange",                
+                "type" : "direct"
+            },
+            "queue" : {                
+                "name" : "external_voice",
+                "bindingKey" : "bind_external_voice",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }, 
+        "out" : {
+            "exchange" : {
+                "name" : "out_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                                
+                "name" : "out_voice",
+                "bindingKey" : "bind_out_voice",  
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false              
+            }
+
+        },
+        "in" : {
+            "exchange" : {
+                "name" : "in_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                
+                "name" : "in_voice",
+                "bindingKey" : "bind_in_voice",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false      
+            }
+        }
+    },
+    "CHAT" : {
+        "channel" : "CHAT",
+        "external" : {            
+            "exchange" : {
+                "name" : "external_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                
+                "name" : "external_chat",
+                "bindingKey" : "bind_external_chat",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }, 
+        "out" : {
+            "exchange" : {
+                "name" : "out_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                
+                "name" : "out_chat",
+                "bindingKey" : "bind_out_chat",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+
+        },
+        "in" : {
+            "exchange" : {
+                "name" : "in_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                
+                "name" : "in_chat",
+                "bindingKey" : "bind_in_chat",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }
+    },
+    "TICKETS" : {
+        "channel" : "TICKETS",
+        "external" : {            
+            "exchange" : {
+                "name" : "external_exchange",                
+                "type": "direct"
+            },
+            "queue" : {                
+                "name" : "external_tickets",
+                "bindingKey" : "bind_external_tickets",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }, 
+        "out" : {
+            "exchange" : {
+                "name" : "out_exchange",                
+                "type": "direct",
+                "durable" : true,
+                "autoDelete" : false
+            },
+            "queue" : {                
+                "name" : "out_tickets",
+                "bindingKey" : "bind_out_tickets",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+
+        },
+        "in" : {
+            "exchange" : {
+                "name" : "in_exchange",                
+                "type": "direct",
+                "durable" : true,
+                "autoDelete" : false
+            },
+            "queue" : {             
+                "name" : "in_tickets",
+                "bindingKey" : "bind_in_tickets",
+                "exclusive" : false,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }
+    },
+    "SPARKS": {
+        "channel": "SPARKS",
+        "pub_sub" : {
+            "exchange" : {
+                "name" : "sparks_exchange",                
+                "type": "fanout",
+                "durable" : true,
+                "autoDelete" : false
+            },
+            "queue" : {             
+                "name" : "",
+                "bindingKey" : "bind_user_map_spark",
+                "exclusive" : true,
+                "durable" : true,
+                "autoDelete" : false
+            }
+        }
+    }
+}

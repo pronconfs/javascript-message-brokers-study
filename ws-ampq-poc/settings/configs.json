@@ -1,0 +1,10 @@
+{
+    "mongo": {
+        "username": "diogo_aleixo",
+        "pass": "dmaaac3",
+        "host": "ds261969.mlab.com",
+        "port": "61969",
+        "database":"heroku_21f9wz06",
+        "batchSize": 100000
+      }
+}
