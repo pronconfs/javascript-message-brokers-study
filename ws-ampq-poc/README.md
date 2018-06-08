@@ -1,5 +1,8 @@
 # POC RabbitMq
 
+https://www.vultr.com/docs/how-to-install-rabbitmq-on-centos-7
+
+
 This is one poc with frontend talking via `ws` to one services layer and then the services talking to the other layers via `amqp` using RabbitMq.
 
 ```
